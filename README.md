@@ -140,20 +140,20 @@ The input file contains five main components:
 
 Defines individual staff-level constraints:
 	•	Name, Rank (CON, AC, HT1/HT2, BT, Elective)
+		abbr: CON=Consultant, AC=Associate Consultant, HT/BT=Higher/Basic Trainee (HT1=senior HT), E=Elective
 	•	Night quotas: N*, N, N3
-	•	Night spacing
+	•	Night spacing (minimal spacing between consecutive Nights)
 	•	Sunday Off, Weekend Off, Sunday PM
 	•	P/A ratio limits
-  •	Target hour balance
-	•	Hour range
+    •	Target hour balance (for those ending rotations)
+	•	Hour range (ensure staff final hour balance within a preset range)
 	•	Limits on PA, PAN, PPP patterns
 
 2. Calendar Grid (Days × Staff)
 
 Users may pre-fill:
-	•	A, P, N, O
-	•	AL, ☆
-	•	noA, noP, noN (prohibitions)
+	•	A, P, N, O, AL, ☆(rest day)
+	•	noA, noP, noN (as prohibitions)
 	•	↗ to indicate a staff-requested shift
 
 The solver interprets these as hard constraints.
@@ -245,11 +245,11 @@ Once the backbone roster is feasible:
 2. Tighten Constraints Gradually
 
 Add or strengthen constraints one group at a time, such as:
+	•	Adjusting weekend/Sunday Off distributions
+	•	Increasing night spacing
 	•	Narrowing senior min/max per shift
 	•	Tightening PA or PAN caps
-	•	Increasing night spacing
-	•	Adjusting weekend/Sunday Off distributions
-	•	Applying more duty requests
+	•	Reducing the hour balance to 9-15h (~1-1.5 shifts)
 
 After each adjustment:
 	•	Re-run the solver
