@@ -1,92 +1,315 @@
-# ED_Roster_demo
-Python-based emergency department rostering system using constraint programming (OR-Tools) and AI-assisted code generation. Includes input template and sample outputs.
-
 🏥 AI-Assisted Emergency Department Rostering
 
-Overview
-
-This repository contains the source code and example templates for an AI-assisted rostering system developed for a Hong Kong emergency department. The project demonstrates how clinicians can use ChatGPT and Google OR-Tools to build a fully functional, constraint-based duty roster generator without formal programming training.
-
-The system uses constraint programming (CP) to assign shifts (A, P, N, O) according to coverage, fairness, and rest-day rules, and includes a post-processing step that refines outputs into department-specific duty codes.
+Python-based constraint programming system using Google OR-Tools and AI-assisted code generation
 
 ⸻
 
-⚙️ Features • Python + Google OR-Tools-based constraint solver • Multi-level constraint hierarchy (fixed, adjustable, soft) • Automatic post-processing • Fairness optimisation using penalty weights • Integration with Excel for easy import/export • Adjustable manpower and rest-rule parameters • AI-assisted code development via ChatGPT prompts
+📌 Overview
+
+This repository contains the source code and example templates for an AI-assisted rostering system developed for a Hong Kong emergency department. The project demonstrates how clinicians can use ChatGPT and Google OR-Tools to build a fully functional constraint-based duty roster generator without formal programming training.
+
+The system uses constraint programming (CP) to assign core shifts—A (AM), P (PM), N (Night), O (Off)—according to coverage, rest-day, and fairness rules.
+A post-processing module then converts these basic duties into department-specific shift subtypes for real-world deployment.
+
+⸻
+
+⚙️ Features
+	•	Python + Google OR-Tools constraint solver
+	•	Multi-level constraint hierarchy (fixed, adjustable, soft)
+	•	Automatic post-processing into department duty codes
+	•	Fairness optimisation via penalty weights
+	•	Excel-based input/output for easy use
+	•	Adjustable manpower, seniority mix, and rest-rules
+	•	AI-assisted code creation using ChatGPT prompts
+	•	Modular architecture for further refinement
+
+⸻
+
+🚀 How to Run the Rostering Program
+
+You can run this program in two ways:
+
+
+Option 1 — Run in GitHub Codespaces
+
+(Recommended for non-technical users; requires a free GitHub account)
+	1.	Log in to your GitHub account.
+	2.	Open this repository:
+https://github.com/EDRosterTest/ED_Roster_demo
+	3.	Click Use this template → Open in Codespaces
+or Code → Create Codespace on main
+	4.	A cloud-based VS Code session will open with all files pre-loaded.
+	5.	Install dependencies (first time only):
+
+pip install -r requirements.txt
+
+
+	6.	Run the solver by clicking Run ▶, or via terminal:
+
+python solve.py
+
+
+
+
+Option 2 — Run Locally (no GitHub login required)
+	1.	Visit the repo (no login required):
+https://github.com/EDRosterTest/ED_Roster_demo
+	2.	Click Code → Download ZIP
+	3.	Unzip the folder
+	4.	Ensure Python 3.9+ is installed
+(VS Code + Python extension recommended)
+	5.	Install dependencies:
+
+pip install -r requirements.txt
+
+
+	6.	Run the solver:
+
+python solve.py
+
+
 
 ⸻
 
 🧩 File Structure
 
-AI-ED-Rostering/ -main.py # Core roster generator (A, P, N, O backbone) -Roster_input.xlsx # input template for demonstration (with loose constraints set) -requirements.txt # Python dependencies -README.md # Documentation
+This repository contains all essential components for generating a roster.
 
-Output_samples/ -Roster_input.xlsx # input template for demonstration (partially titrated constraints) -Roster_Output1.xlsx. # output sample for demonstration ((A, P, N, O backbone) with even distribution of the fairness metrics -Roster_Output2.xlsx # output sample for demonstration ((A, P, N, O backbone -> post processing)
+
+
+🔧 Solver - solve.py
+	•	Core Python script that generates the roster
+	•	Modular coding structure for future extension
+	•	Produces the output files when executed
+
+
+
+📥 Input Template - Roster_input.xlsx
+	•	Main Excel template used by the solver
+	•	Sample version represents a 28-doctor November 2025 roster with pre-filled duty requests
+	•	Users may adjust quotas, constraints, duty requests, manpower tables, etc.
+
+
+
+📤 Output Files (Generated after running the solver)
+
+Roster_Output1.xlsx
+	•	Backbone roster with A / P / N / O assignments
+	•	Reflects satisfaction of all hard constraints
+	•	Includes staff statistics (Sun Off, Weekend Off, Sunday PM, P/A ratio, hour balance)
+	•	Includes day statistics (AM/PM/N counts, seniority mix, PA counts)
+
+Roster_Output2.xlsx (output if run mode =2)
+	•	Post-processed roster
+	•	Converts A/P/N/O into department-specific duty subtypes:
+		•	Morning (AM) duties: A (08–16), B (07–15), K (07:30–15:30), A2 (08–17), D2 (09–18)
+		•	Evening (PM) duties: P (16–24), E2 (15–24), S2 (15–23)
+		•	Night/Others: N (00–08), Z2 (non-clinical), T / ½t (Training)
+		•	Special duties (as suffix)
+ 			•	* (shift IC), ♥ (resus), %¥ (clinic/lab)
+			•	^, ⓦ, ω (EM ward related)
+			•	O® (reserved off)
+      •	Example: A2♥ means 08-17 duty hour with resus duty; E2* means 15-24 hour as shift IC  
+		•	Pattern conversions (e.g., P→A becomes S2→A2 or E2→D2)
+
+Roster_Output3.xlsx (Not included for privacy)
+	•	Department-format roster rewritten into the official template
+
+📁 Sample Files (Sample/ folder)
+	•	Roster_input.xlsx — Demonstration input
+	•	Roster_Output1.xlsx — Sample backbone roster
+	•	Roster_Output2.xlsx — Sample post-processed roster
+
+📦 Supporting Files
+	•	requirements.txt — Python package dependencies
+	•	README.md — Documentation
 
 ⸻
 
-🧠 Method Summary 1. Backbone generation: The solver first creates a roster composed solely of A, P, N, and O shifts based on user-defined constraints. 2. Constraint hierarchy: • Fixed hard constraints: safety & policy rules (e.g. post-night rest, one duty/day) • Adjustable hard constraints: manpower per shift, duty requests, weekend off, etc. • Soft constraints: fairness, rest balance, penalty-based optimisation 3. Post-processing: The system translates the backbone roster into specific departmental codes (A2, B, E2, D2, etc.) to improve coverage.
+📘 Input File, Output Files, and Encoded Rules
+
+Below summarises how the input file works and how the solver interprets rules.
+
+
+
+📥 1. Input File (Roster_input.xlsx)
+
+The input file contains five main components:
+
+1. Staff Information Table
+
+Defines individual staff-level constraints:
+	•	Name, Rank (CON, AC, HT1/HT2, BT, Elective)
+	•	Night quotas: N*, N, N3
+	•	Night spacing
+	•	Sunday Off, Weekend Off, Sunday PM
+	•	P/A ratio limits
+  •	Target hour balance
+	•	Hour range
+	•	Limits on PA, PAN, PPP patterns
+
+2. Calendar Grid (Days × Staff)
+
+Users may pre-fill:
+	•	A, P, N, O
+	•	AL, ☆
+	•	noA, noP, noN (prohibitions)
+	•	↗ to indicate a staff-requested shift
+
+The solver interprets these as hard constraints.
+
+3. Global Settings
+
+Optional department-wide rules:
+	•	Min/Max Sunday Off
+	•	Min/Max Weekend Off
+	•	Min/Max Sunday PM
+	•	Global PA ratio
+	•	Global night-spacing requirement
+
+These act as adjustable-hard constraints.
+
+4. Manpower Requirements (Manpower Block)
+
+Daily coverage rules:
+	•	Required AM / PM / N headcount
+	•	Min/Max seniors
+	•	Min/Max CON / AC / HT / BT / E per shift
+
+Defines safe staffing and seniority distribution.
+
+
+5. Run Modes
+
+Optimisation toggle (cell D3)
+	•	“N” — no penalties (faster; feasibility first)
+	•	“Y” — apply penalties for unfavourable patterns (searches best roster within 300s)
+
+Module toggle (cell D4)
+	•	1 → Solver only (Output1)
+	•	2 → Solver + Post-processing (Output1 + Output2)
+	•	3 → Full pipeline (Output1 + Output2 + Output3)
+
+📤 2. Output Files (Summary)
+	•	Output1: Backbone roster (A/P/N/O)
+	•	Output2: Department shift subtypes
+	•	Output3: Departmental template (not included)
+
+
+🧠 3. Key Rules Encoded (Constraint Logic)
+
+A. Fixed Hard Constraints (non-negotiable)
+	•	One duty per day
+	•	≤6 workdays in any 7-day window
+	•	Mandatory A–N–O sequence for night duties
+	•	No P→P across Sat–Sun
+	•	Required senior mix
+	•	At least one specialist in every A/P shift
+	•	Honour all pre-filled duties
+
+B. Adjustable Hard Constraints
+	•	Staff duty requests (modifiable after discussion)
+	•	Daily staffing coverage for A, P, N
+	•	Rank-mix minimum/maximum
+	•	Night frequency and spacing
+	•	Weekend/Sunday Off allocation
+	•	Hour-balance range
+	•	P/A ratio
+	•	Caps for PA, PAN, PPP patterns
+
+C. Soft Constraints
+
+Used when optimisation toggle = “Y”:
+	•	Penalties for PA, PAN, PPP
+	•	Encourages fairness while preserving feasibility
 
 ⸻
 
-🧮 Requirements • Python 3.9+ • Google OR-Tools • OpenPyXL • Pandas
+💡 Tips for Running the Solver Effectively
 
-To install:
+Generating a feasible roster is an iterative process. The following workflow is recommended:
 
-pip install -r requirements.txt
+1. Start Simple
 
-⸻
+Begin with:
+	•	Minimal fixed requests
+	•	Loose constraints (wide min/max ranges)
+	•	Fewer restrictions on weekend off, Sunday PM, PA ratio, pattern caps, etc.
 
-▶️ Usage 1. Edit example_input.xlsx to include your dummy staff list and desired parameters. 2. Run the solver (typing in terminal):
+Once the backbone roster is feasible:
+	•	Check coverage counts
+	•	Review seniority distribution
+	•	Inspect day-by-day AM/PM/N balance
+	•	Verify staff hour balance and P/A ratios
 
-python main.py
+2. Tighten Constraints Gradually
 
-3.	Review the generated output
-4.	(Optional) Apply post_processing.py for department-specific duty translation.
-⸻
+Add or strengthen constraints one group at a time, such as:
+	•	Narrowing senior min/max per shift
+	•	Tightening PA or PAN caps
+	•	Increasing night spacing
+	•	Adjusting weekend/Sunday Off distributions
+	•	Applying more duty requests
 
-How the solver runs
+After each adjustment:
+	•	Re-run the solver
+	•	Ensure feasibility is preserved
 
-Files & toggles • Input: • Roster_input.xlsx (working sheet, tab Sheet1) • Outputs: • Roster_Output1.xlsx (solver write-back) • Roster_Output2.xlsx (after post-processing) • Roster_Output3.xlsx (transcribed into departmental template)
+This progressive tightening ensures stable convergence without overwhelming the model.
 
-• Run by typing: "python main.py" in terminal
+3. Tune Fairness or Penalties Last
 
-• Toggles in Sheet1 • cell D3: "Y" turns on soft-penalty optimization (PA/PAN/PPP, etc.) • cell D4: integer stage toggle • 1 → stop after solver write-back (Roster_Output1.xlsx) • 2 → run post-processing and save Roster_Output2.xlsx • 3 → also transcribe into template (Roster_Output3.xlsx)
+Once feasibility is stable:
+	•	Turn on optimisation (cell D3 = Y) for penalty weights for PA, PAN, PPP
+	•	Apply penalty-based seniority balancing if desired
 
-Prepare your Excel input • Open Roster_input.xlsx (Sheet1) • Adjust constraints if necessary • Manpower section — daily AM / PM / N coverage numbers and senior mix. • Settings (top rows) — min/max Sundays off, weekend off, Sunday PM limits, etc. • Fixed duty requests — mark any pre-decided shifts in the calendar grid (e.g. A, P, O, AL, ☆, A↗). • Optional: adjust hour targets, PA ratio limits, or pattern caps in the side columns. • Save the file after edits.
+Penalty functions shape the quality of the roster but may significantly increase runtime.
+Use only after the core constraints are functioning well.
 
-⸻
+4. Handling Infeasibility
 
-Run the solver • Open Codespace / VS Code terminal • Run: python main.py • Wait for the message: ✅ Written Roster_Output1.xlsx • Review the output • Refine iteratively • Adjust constraints (e.g. loosen min/max Off, relax coverage, tune spacing). • Re-run the script — the solver will regenerate automatically. 💡 Tips: If you get “❌ No feasible solution”, some quotas or coverage may conflict — relax one or two limits and retry.
+If the solver reports no solution:
+	1.	Identify the likely bottleneck
+	•	Night quotas?
+	•	Senior mix limits?
+	•	Weekend Off caps?
+	•	Too many fixed duty requests?
+	2.	Loosen the constraints that are most restrictive
+	3.	Re-run until feasibility returns, then continue fine-tuning.
 
-Write back solver results (Roster_Output1.xlsx)
+6. Final Optimisation
 
-Post-processing / translation (if toggled on) → Roster_Output2.xlsx
-
-Transcribe into departmental template (if toggled on). Saves Roster_Output3.xlsx. (departmental template was not uploaded due to privacy issue)
-
-⸻
-
-Constraint highlights (what the model guarantees) • Exact daily coverage for AM/PM/N. • Rank-mix balance per day (seniors, CON/AC/HT/BT/E bands). • Fixed requests and OFF-types honored exactly where specified. • Night spacing and ≤6/7 workday rule across the month boundary. • PA/PA-N/PPP caps per staff; 4×PM prohibited; daily PA caps by day • P/A ratio compliance (per-staff and global). • Sunday/Weekend Off min/max, Sunday PM quotas. • Objective (if enabled) minimizes PAN, PA, and 3×PM occurrences.
+Once feasibility and general fairness are acceptable:
+	•	Run a final optimisation cycle
+	•	Review Output2 for correct department subtypes
+	•	Use Output3 (if enabled) for operational-format export
 
 ⸻
 
 🔒 Data Privacy
 
-This repository contains only anonymised demonstration data. No identifiable staff information or real duty records are included. For ethical reasons, clinical or operational use should involve local validation.
+Only anonymised demonstration data are included.
+No real staff information or clinical data are stored in this repository.
 
 ⸻
 
 📘 Citation
 
-If you reference or adapt this code, please cite: (to be added before publication)
-
+Chi-kit Sin, Shu-wing Kung. Implementation and Development Experience of an AI-Assisted Rostering System in a Hong Kong Emergency Department. Hong Kong Journal of Emergency Medicine.
+DOI: 10.1002/hkj2.70061
 ⸻
 
 📬 Contact
 
-For academic correspondence: (to be added before publication)
+Dr SIN, CHI KIT
+Department of Accident and Emergency
+Tseung Kwan O Hospital
+Email: johnsin1113@gmail.com
 
 ⸻
 
 ⚠️ Disclaimer
 
-This software is provided for research and educational purposes only. It is not a certified clinical scheduling product. Use at your own discretion.
+This software is intended for research and educational use only.
+It is not a certified clinical scheduling product.
+Use at your own discretion.
