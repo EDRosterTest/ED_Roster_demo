@@ -109,7 +109,7 @@ Roster_Output2.xlsx (output if run mode =2)
  			•	* (shift IC), ♥ (resus), %¥ (clinic/lab)
 			•	^, ⓦ, ω (EM ward related)
 			•	O® (reserved off)
-      •	Example: A2♥ means 08-17 duty hour with resus duty; E2* means 15-24 hour as shift IC  
+			•	Example: A2♥ means 08-17 duty hour with resus duty; E2* means 15-24 hour as shift IC  
 		•	Pattern conversions (e.g., P→A becomes S2→A2 or E2→D2)
 
 Roster_Output3.xlsx (Not included for privacy)
@@ -141,13 +141,16 @@ The input file contains five main components:
 Defines individual staff-level constraints:
 	•	Name, Rank (CON, AC, HT1/HT2, BT, Elective)
 		abbr: CON=Consultant, AC=Associate Consultant, HT/BT=Higher/Basic Trainee (HT1=senior HT), E=Elective
-	•	Night quotas: N*, N, N3
+	•	Night: N*, N, N3
 	•	Night spacing (minimal spacing between consecutive Nights)
 	•	Sunday Off, Weekend Off, Sunday PM
-	•	P/A ratio limits
-    •	Target hour balance (for those ending rotations)
-	•	Hour range (ensure staff final hour balance within a preset range)
-	•	Limits on PA, PAN, PPP patterns
+		either input exact quota, or leave blank to let system assign
+	•	P/A ratio (PM/AM duty ratio) limits
+    •	Target final hour balance
+		e.g. for elective ending rotations & clearing balance)
+	•	Hour range
+		ensure staff final hour balance within a preset range (excluding those with target balance)
+	•	Limits on PA, PAN, PPP patterns (optional
 
 2. Calendar Grid (Days × Staff)
 
